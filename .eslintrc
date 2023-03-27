@@ -1,0 +1,10 @@
+{
+  "extends": [
+    "oclif",
+    "oclif-typescript"
+  ],
+  "rules": {
+    "no-return-await": "off",
+    "@typescript-eslint/ban-ts-comment": "off"
+  }
+}
