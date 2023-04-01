@@ -11,8 +11,8 @@ const expectOutput = (ctx: any, language: 'ts' | 'js') => {
   const demoTask = language === 'ts' ? demoTaskTs : demoTaskJs
   const indexFile = language === 'ts' ? tsFile : jsFile
   expect(ctx.stdout).to.contain('Creating onu/ directory in the current project...')
-  expect(ctx.stdout).to.contain(`Creating onu/index.${extension} file...`)
-  expect(ctx.stdout).to.contain(`Creating onu/demoTask.${extension} file...`)
+  expect(ctx.stdout).to.contain(`Creating ${path.join('onu', `index.${extension}`)} file...`)
+  expect(ctx.stdout).to.contain(`Creating ${path.join('onu', `demoTask.${extension}`)} file...`)
   // ensure that the fs.promises.mkdir function was called
   const fsMockMkdir = fse.mkdirSync as unknown as sinon.SinonStub
   expect(fsMockMkdir.called).to.be.true
