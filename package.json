@@ -1,6 +1,6 @@
 {
   "name": "onu",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Onu CLI",
   "author": "Onu Wellness, Inc.",
   "bin": {
@@ -26,9 +26,10 @@
     "@oclif/plugin-warn-if-update-available": "^2.0.32",
     "@octokit/rest": "^19.0.7",
     "chalk": "^4",
+    "console-table-printer": "^2.11.1",
     "detect-port": "^1.5.1",
-    "fs": "^0.0.1-security",
     "fs-extra": "^11.1.1",
+    "inquirer": "8.2.3",
     "is-internet-available": "^3.1.0",
     "open": "^8.4.2",
     "shelljs": "^0.8.5"
