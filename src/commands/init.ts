@@ -63,7 +63,7 @@ export default class Init extends Command {
 
       this.log(`Creating ${projectName}/ directory...`)
       fse.mkdirSync(projectName)
-      basePath = `${projectName}/onu`
+      basePath = path.join(projectName, 'onu')
 
       this.log(`Creating ${basePath} directory...`)
       fse.mkdirSync(basePath)
