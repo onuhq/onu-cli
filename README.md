@@ -13,7 +13,7 @@ $ npm install -g onu
 $ onu COMMAND
 running command...
 $ onu (--version)
-onu/0.0.1 darwin-x64 node-v16.0.0
+onu/0.2.0 darwin-x64 node-v18.0.0
 $ onu --help [COMMAND]
 USAGE
   $ onu COMMAND
@@ -22,8 +22,31 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
+* [`onu dev [-p <value>]`](#onu-dev--p-value)
 * [`onu help [COMMANDS]`](#onu-help-commands)
 * [`onu init`](#onu-init)
+* [`onu sos`](#onu-sos)
+
+## `onu dev [-p <value>]`
+
+Runs a local dev studio [experimental 🧪]
+
+```
+USAGE
+  $ onu dev [-p <value>]
+
+FLAGS
+  -h, --help          Show help
+  -p, --port=<value>  [default: 3000] Port to run on
+
+DESCRIPTION
+  Runs a local dev studio [experimental 🧪]
+
+EXAMPLES
+  $ onu dev -p 8000
+```
+
+_See code: [dist/commands/dev.ts](https://github.com/onuhq/onu-cli/blob/v0.2.0/dist/commands/dev.ts)_
 
 ## `onu help [COMMANDS]`
 
@@ -61,8 +84,24 @@ DESCRIPTION
 
 EXAMPLES
   $ onu init -l typescript
-  Successfully  created an onu/ directory in the current project!
 ```
 
-_See code: [dist/commands/init/index.ts](https://github.com/onuhq/onu-cli/blob/v0.0.1/dist/commands/init/index.ts)_
+_See code: [dist/commands/init.ts](https://github.com/onuhq/onu-cli/blob/v0.2.0/dist/commands/init.ts)_
+
+## `onu sos`
+
+Displays contact information for the Onu team
+
+```
+USAGE
+  $ onu sos
+
+DESCRIPTION
+  Displays contact information for the Onu team
+
+EXAMPLES
+  $ onu sos
+```
+
+_See code: [dist/commands/sos.ts](https://github.com/onuhq/onu-cli/blob/v0.2.0/dist/commands/sos.ts)_
 <!-- commandsstop -->
