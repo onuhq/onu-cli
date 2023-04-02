@@ -13,7 +13,7 @@ $ npm install -g onu
 $ onu COMMAND
 running command...
 $ onu (--version)
-onu/0.2.0 darwin-x64 node-v18.0.0
+onu/0.2.1 darwin-x64 node-v18.0.0
 $ onu --help [COMMAND]
 USAGE
   $ onu COMMAND
@@ -36,8 +36,9 @@ USAGE
   $ onu dev [-p <value>]
 
 FLAGS
-  -h, --help          Show help
-  -p, --port=<value>  [default: 3000] Port to run on
+  -h, --help              Show help
+  -p, --port=<value>      [default: 3000] Port to run on
+  -t, --tsconfig=<value>  [default: ./tsconfig.json] Path to a custom tsconfig file
 
 DESCRIPTION
   Runs a local dev studio [experimental 🧪]
@@ -46,7 +47,7 @@ EXAMPLES
   $ onu dev -p 8000
 ```
 
-_See code: [dist/commands/dev.ts](https://github.com/onuhq/onu-cli/blob/v0.2.0/dist/commands/dev.ts)_
+_See code: [dist/commands/dev.ts](https://github.com/onuhq/onu-cli/blob/v0.2.1/dist/commands/dev.ts)_
 
 ## `onu help [COMMANDS]`
 
@@ -86,7 +87,7 @@ EXAMPLES
   $ onu init -l typescript
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/onuhq/onu-cli/blob/v0.2.0/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/onuhq/onu-cli/blob/v0.2.1/dist/commands/init.ts)_
 
 ## `onu sos`
 
@@ -103,5 +104,5 @@ EXAMPLES
   $ onu sos
 ```
 
-_See code: [dist/commands/sos.ts](https://github.com/onuhq/onu-cli/blob/v0.2.0/dist/commands/sos.ts)_
+_See code: [dist/commands/sos.ts](https://github.com/onuhq/onu-cli/blob/v0.2.1/dist/commands/sos.ts)_
 <!-- commandsstop -->
