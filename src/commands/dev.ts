@@ -152,6 +152,13 @@ const runSite = async (command: Command, port: string) => {
   onuDevJson.env = onuDevJson.env || {}
   shell.cd(CLIENT_PATH)
 
+  for (const key in onuDevJson.env) {
+    // if the value if an object, stringify it
+    if (typeof onuDevJson.env[key] === 'object') {
+      onuDevJson.env[key] = JSON.stringify(onuDevJson.env[key])
+    }
+  }
+
   const onuStudioProcess = childProcess.spawn('npm run dev', {
     env: {
       ...process.env,
