@@ -52,7 +52,7 @@ const downloadTargetOnuStudio = async (command: Command) => {
   shell.exec('yarn', {silent: true})
 }
 
-const runDevStudio = async (command: Command, port: string | undefined) => {
+const runDevStudio = async (command: Command, port: string | undefined, tsconfig: string | undefined) => {
   shell.cd(HOME_DIR)
   await promptForYarn()
   ux.action.start('Preparing local Onu Studio instance...')
@@ -113,7 +113,8 @@ const runDevStudio = async (command: Command, port: string | undefined) => {
   shell.rm('-rf', TS_FILES_DIST_PATH)
   if (isTypescript) {
     // compile the files
-    const typescriptProcess = childProcess.spawnSync('npx tsc -p tsconfig.json', ['--outDir', TS_FILES_DIST_PATH], {
+    const tsConfigFilePath = tsconfig || 'tsconfig.json'
+    const typescriptProcess = childProcess.spawnSync(`npx tsc -p ${tsConfigFilePath}`, ['--outDir', TS_FILES_DIST_PATH], {
       shell: true,
       cwd: CMD_EXEC_PATH,
       stdio: 'pipe',
@@ -203,6 +204,7 @@ export default class Dev extends Command {
   static flags = {
     port: Flags.integer({char: 'p', description: 'Port to run on', default: 3000}),
     help: Flags.boolean({char: 'h', description: 'Show help'}),
+    tsconfig: Flags.string({char: 't', description: 'Path to a custom tsconfig file', default: './tsconfig.json'}),
   }
 
   public async run(): Promise<void> {
@@ -229,6 +231,6 @@ export default class Dev extends Command {
       this.error('No available port found.')
     }
 
-    await runDevStudio(this, port.toString())
+    await runDevStudio(this, port.toString(), flags.tsconfig)
   }
 }
