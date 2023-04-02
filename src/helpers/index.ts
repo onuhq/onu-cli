@@ -10,27 +10,16 @@ import {ONU_DEV_JSON} from './starter-files'
 import childProcess from 'node:child_process'
 
 export const installProjectDeps = (installer: string, projectName: string, command: Command): void => {
-  const installProcess = childProcess.spawn(installer === 'npm' ? 'npm install' : 'yarn', {
+  const installProcess = childProcess.spawnSync(installer === 'npm' ? 'npm install' : 'yarn', {
     cwd: path.join(CMD_EXEC_PATH, projectName),
     stdio: 'pipe',
     shell: true,
   })
-  installProcess.stdout.on('data', async (data: any) => {
-    const output = data.toString()
-    console.log(output)
-  })
-
-  installProcess.stderr.on('data', async (data: any) => {
-    const output = data.toString()
-    console.log(output)
-  })
-  const onExit = () => {
-    installProcess.kill('SIGINT')
-    command.exit(0)
+  if (installProcess.status !== 0) {
+    command.log(installProcess.stdout.toString())
+    command.warn(`There was an error installing dependencies for ${projectName}`)
+    command.exit(1)
   }
-
-  process.on('SIGINT', onExit)
-  process.on('SIGTERM', onExit)
 }
 
 export const studioNodeModulesExists = async (): Promise<boolean> => {

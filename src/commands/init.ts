@@ -5,6 +5,7 @@ import inquirer from 'inquirer'
 import path from 'node:path'
 import {TARGET_ONU_NODE_VERSION} from '../constants'
 import {installProjectDeps} from '../helpers'
+import chalk from 'chalk'
 
 export default class Init extends Command {
   static description = 'Initializes an `onu/` directory within the current project'
@@ -127,6 +128,7 @@ export default class Init extends Command {
 
         this.log('Installing dependencies...')
         installProjectDeps(installer, projectName, this)
+        this.log(chalk.green(`\nDone! To start your project, run:\n\ncd ${projectName}\n${installer === 'npm' ? 'npm run dev' : 'yarn dev'}\n\n`))
       }
 
       break
@@ -180,6 +182,7 @@ export default class Init extends Command {
 
         this.log('Installing dependencies...')
         installProjectDeps(installer, projectName, this)
+        this.log(chalk.green(`\nDone! To start your project, run:\n\ncd ${projectName}\n${installer === 'npm' ? 'npm run dev' : 'yarn dev'}\n\n`))
       }
 
       break

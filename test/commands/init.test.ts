@@ -80,7 +80,7 @@ describe('init', () => {
   .stub(fse, 'existsSync', sinon.stub().returns(false))
   .stub(fse, 'mkdirSync', sinon.stub().returns(true))
   .stub(inquirer, 'prompt', sinon.stub().returns({projectName: 'testProject', installer: 'npm', createNewProject: 'create'}))
-  .stub(childProcess, 'spawn', sinon.stub().returns({stderr: {on: sinon.stub().returns(true)}, stdout: {on: sinon.stub().returns(true)}}))
+  .stub(childProcess, 'spawnSync', sinon.stub().returns({status: 0}))
   .command(['init', '--language=ts'])
   .it('Creates a new project with ts', ctx => {
     expect(ctx.stdout).to.contain('Creating testProject/ directory...')
@@ -113,7 +113,7 @@ describe('init', () => {
   .stub(fse, 'existsSync', sinon.stub().returns(false))
   .stub(fse, 'mkdirSync', sinon.stub().returns(true))
   .stub(inquirer, 'prompt', sinon.stub().returns({projectName: 'testProject', installer: 'npm', createNewProject: 'create'}))
-  .stub(childProcess, 'spawn', sinon.stub().returns({stderr: {on: sinon.stub().returns(true)}, stdout: {on: sinon.stub().returns(true)}}))
+  .stub(childProcess, 'spawnSync', sinon.stub().returns({status: 0}))
   .command(['init', '--language=js'])
   .it('Creates a new project with js', ctx => {
     expect(ctx.stdout).to.contain('Creating testProject/ directory...')
