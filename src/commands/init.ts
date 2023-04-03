@@ -119,7 +119,7 @@ export default class Init extends Command {
         packageJson.scripts.build = 'npx tsc'
 
         // add a dev script
-        packageJson.scripts.dev = 'npx onu dev'
+        packageJson.scripts.dev = 'npx onu@latest dev'
 
         // add a start script
         packageJson.scripts.start = 'node dist/onu/index.js'
@@ -173,7 +173,7 @@ export default class Init extends Command {
         packageJson.dependencies['node-fetch'] = '^2.6.6'
 
         // add a dev script
-        packageJson.scripts.dev = 'npx onu dev'
+        packageJson.scripts.dev = 'npx onu@latest dev'
 
         // add a start script
         packageJson.scripts.start = 'node onu/index.js'
