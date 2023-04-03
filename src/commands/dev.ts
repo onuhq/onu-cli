@@ -114,7 +114,8 @@ const runDevStudio = async (command: Command, port: string | undefined, tsconfig
   if (isTypescript) {
     // compile the files
     const tsConfigFilePath = tsconfig || 'tsconfig.json'
-    const typescriptProcess = childProcess.spawnSync(`npx tsc -p ${tsConfigFilePath}`, ['--outDir', TS_FILES_DIST_PATH], {
+    const tscAliasCommand = `&& npx --yes tsc-alias -p ${tsConfigFilePath} --outDir ${TS_FILES_DIST_PATH}`
+    const typescriptProcess = childProcess.spawnSync(`npx --yes tsc -p ${tsConfigFilePath} --outDir ${TS_FILES_DIST_PATH} ${tscAliasCommand}`, [], {
       shell: true,
       cwd: CMD_EXEC_PATH,
       stdio: 'pipe',
@@ -123,6 +124,7 @@ const runDevStudio = async (command: Command, port: string | undefined, tsconfig
     if (typescriptProcess.status !== 0) {
       ux.action.stop()
       console.log(typescriptProcess.stdout.toString())
+      console.log(typescriptProcess.stderr.toString())
       console.log('There was an error compiling your Typescript files')
       command.exit(1)
     }
@@ -152,6 +154,13 @@ const runSite = async (command: Command, port: string) => {
   onuDevJson.env = onuDevJson.env || {}
   shell.cd(CLIENT_PATH)
 
+  for (const key in onuDevJson.env) {
+    // if the value if an object, stringify it
+    if (typeof onuDevJson.env[key] === 'object') {
+      onuDevJson.env[key] = JSON.stringify(onuDevJson.env[key])
+    }
+  }
+
   const onuStudioProcess = childProcess.spawn('npm run dev', {
     env: {
       ...process.env,
@@ -165,7 +174,6 @@ const runSite = async (command: Command, port: string) => {
   })
   onuStudioProcess.stdout.on('data', async (data: any) => {
     const output = data.toString()
-    console.log(output)
     if (output.includes('started server on')) {
       console.log(
         chalk.green(`Onu Studio is available at http://localhost:${port}`),
@@ -182,9 +190,8 @@ const runSite = async (command: Command, port: string) => {
     console.log(output)
   })
   const onExit = () => {
-    command.log('Exiting Onu Studio')
+    command.log(chalk.magenta('\n✨ Successfully exited Onu Studio\n'))
     onuStudioProcess.kill('SIGINT')
-    command.exit(0)
   }
 
   process.on('SIGINT', onExit)
