@@ -129,11 +129,12 @@ const runDevStudio = async (command: Command, port: string | undefined, tsconfig
       command.exit(1)
     }
 
-    // copy over node_modules
-    shell.cp('-R', path.join(CMD_EXEC_PATH, 'node_modules'), TS_FILES_DIST_PATH)
+    // install node modules
     shell.cp('-R', path.join(CMD_EXEC_PATH, 'package.json'), TS_FILES_DIST_PATH)
+    shell.cd(TS_FILES_DIST_PATH)
+    shell.exec('yarn', {silent: true})
 
-    console.log('Compiled Typescript files')
+    command.log('Compiled Typescript files')
   } else {
     shell.cp('-R', CMD_EXEC_PATH, TS_FILES_DIST_PATH)
   }
@@ -144,7 +145,8 @@ const runDevStudio = async (command: Command, port: string | undefined, tsconfig
   shell.cd(CLIENT_PATH)
   const relativePath = path.relative(CLIENT_PATH, CMD_EXEC_PATH)
   childProcess.spawnSync('yarn preconfigure', [relativePath], {shell: true})
-  ux.action.stop('Local Onu Studio instance is ready. Launching your site...')
+  ux.action.stop('done')
+  command.log('Local Onu Studio instance is ready. Launching your site...')
   await runSite(command, (port as string) || '3000')
 }
 
@@ -187,6 +189,10 @@ const runSite = async (command: Command, port: string) => {
 
   onuStudioProcess.stderr.on('data', async (data: any) => {
     const output = data.toString()
+    if (output.includes('ExperimentalWarning') || output.includes('Fast Refresh had to perform a full reload')) {
+      return
+    }
+
     console.log(output)
   })
   const onExit = () => {
