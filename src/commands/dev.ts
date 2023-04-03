@@ -174,7 +174,6 @@ const runSite = async (command: Command, port: string) => {
   })
   onuStudioProcess.stdout.on('data', async (data: any) => {
     const output = data.toString()
-    // console.log(output)
     if (output.includes('started server on')) {
       console.log(
         chalk.green(`Onu Studio is available at http://localhost:${port}`),
