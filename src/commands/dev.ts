@@ -195,13 +195,16 @@ const runSite = async (command: Command, port: string) => {
 
     console.log(output)
   })
-  const onExit = () => {
-    command.log(chalk.magenta('\n✨ Successfully exited Onu Studio\n'))
+  const onExit = (signal: 'SIGINT' | 'SIGTERM') => {
+    if (signal === 'SIGINT') {
+      command.log(chalk.magenta('\n✨ Successfully exited Onu Studio\n'))
+    }
+
     onuStudioProcess.kill('SIGINT')
   }
 
-  process.on('SIGINT', onExit)
-  process.on('SIGTERM', onExit)
+  process.on('SIGINT', () => onExit('SIGINT'))
+  process.on('SIGTERM', () => onExit('SIGTERM'))
   // listener()
 }
 
