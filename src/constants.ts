@@ -4,7 +4,7 @@ import path from 'node:path'
 export const TARGET_STUDIO_VERSION = 'v0.1.1'
 
 // Change this to bump to a newer version of @onuhq/node for the starter files
-export const TARGET_ONU_NODE_VERSION = '^0.2.0'
+export const TARGET_ONU_NODE_VERSION = '^0.3.0'
 
 export const HOME_DIR = os.homedir()
 

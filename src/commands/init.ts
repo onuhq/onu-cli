@@ -108,12 +108,13 @@ export default class Init extends Command {
           devDependencies: {},
         }
         packageJson.name = projectName
-        packageJson.main = 'onu/index.ts'
+        packageJson.main = 'dist/onu/index.js'
         packageJson.dependencies['@onuhq/node'] = TARGET_ONU_NODE_VERSION
         packageJson.dependencies['node-fetch'] = '^2.6.6'
 
         // add typescript as a dev dependency
         packageJson.devDependencies.typescript = '^5.0.3'
+        packageJson.devDependencies['@types/node'] = '^18.15.11'
 
         // add a build script
         packageJson.scripts.build = 'npx tsc'
