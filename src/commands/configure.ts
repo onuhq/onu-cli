@@ -22,12 +22,6 @@ export default class Configure extends Command {
     ])
     const apiKey = responses.apiKey
 
-    // Validate the key against the API
-
-    // If the key is valid, save it to the config file
-    // make a request to the api to validate the key
-    // if the key is valid, save it to the config file
-    // if the key is invalid, throw an error
     ux.action.start('Validating API key')
 
     const resp = await fetch(`${BASE_URL}/v1/cli/auth/validate`, {

@@ -1,4 +1,4 @@
-import {Command, Flags, ux} from '@oclif/core'
+import {Command, ux} from '@oclif/core'
 import {execNodeModulesExists, execPackageExists} from '../helpers'
 import fse from 'fs-extra'
 import path from 'node:path'
@@ -51,7 +51,7 @@ export const checkOnuDotJson = async (command: Command): Promise<void> => {
       onuDotJson.runtime = runtime
       onuDotJson.path = onuPath
 
-      // Write the onu.dev.json file
+      // Write the onu.json file
       fse.writeFileSync(path.join(CMD_EXEC_PATH, 'onu.json'), JSON.stringify(onuDotJson, null, 2))
 
       command.log(chalk.green('onu.json created. Continuing deployment...'))
@@ -75,10 +75,6 @@ export default class Deploy extends Command {
     '<%= config.bin %> <%= command.id %>',
   ]
 
-  static flags = {
-    path: Flags.string({char: 'p', description: 'Path to the onu/ directory'}),
-  }
-
   public async run(): Promise<void> {
     // Ensure that command is running in the root of a project
     // Ensure that there is a package.json and node_modules
@@ -90,8 +86,19 @@ export default class Deploy extends Command {
     }
 
     // ensure there is a config file with a current org and api key
-    if (!await fse.pathExists(path.join(DOT_ONU, 'config.json'))) {
+    const configFileExists = await fse.pathExists(path.join(DOT_ONU, 'config.json'))
+    if (!configFileExists) {
       this.error('No config file found. Run `onu configure` to login to your Onu account.', {exit: 1})
+    }
+
+    const config = await fse.readJSON(path.join(DOT_ONU, 'config.json'))
+
+    if (!config.currentOrg) {
+      this.error('No current org found. Please run `onu configure` to login to your Onu account.', {exit: 1})
+    }
+
+    if (!config.auth[config.currentOrg]) {
+      this.error('No api key found for current org. Please run `onu configure` to login to your Onu account.', {exit: 1})
     }
 
     await checkOnuDotJson(this)
@@ -125,16 +132,6 @@ export default class Deploy extends Command {
 
     ux.action.stop('done')
     ux.action.start('Deploying tasks')
-
-    const config = await fse.readJSON(path.join(DOT_ONU, 'config.json'))
-
-    if (!config.currentOrg) {
-      this.error('No current org found. Please run `onu configure` to login to your Onu account.', {exit: 1})
-    }
-
-    if (!config.auth[config.currentOrg]) {
-      this.error('No api key found for current org. Please run `onu configure` to login to your Onu account.', {exit: 1})
-    }
 
     // get the api key from the config
     const currentOrg = config.currentOrg
