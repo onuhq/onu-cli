@@ -23,7 +23,7 @@
   "dependencies": {
     "@oclif/core": "^2",
     "@oclif/plugin-help": "^5",
-    "@oclif/plugin-warn-if-update-available": "^2.0.32",
+    "@oclif/plugin-warn-if-update-available": "^2.0.33",
     "@octokit/rest": "^19.0.7",
     "chalk": "^4",
     "console-table-printer": "^2.11.1",
