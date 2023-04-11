@@ -47,6 +47,23 @@ export default class Init extends Command {
           name: 'projectName',
           message: 'Enter a name for the new project',
           type: 'input',
+          validate: (input: string) => {
+            if (input.length === 0) {
+              return 'Please enter a name for the project'
+            }
+
+            // ensure that the input does not have spaces
+            if (input.includes(' ')) {
+              return 'Project name cannot contain spaces'
+            }
+
+            // ensure that the input is a valid package.json name
+            if (!/^[\da-z-]+$/.test(input)) {
+              return 'Project name can only contain lowercase letters, numbers, and dashes'
+            }
+
+            return true
+          },
         },
         {
           name: 'installer',
@@ -112,9 +129,6 @@ export default class Init extends Command {
         packageJson.devDependencies.typescript = '^5.0.3'
         packageJson.devDependencies['@types/node'] = '^18.15.11'
 
-        // add tslib as a dev dependency
-        packageJson.devDependencies.tslib = '^2.5.0'
-
         // add a build script
         packageJson.scripts.build = 'npx tsc'
 
@@ -164,9 +178,6 @@ export default class Init extends Command {
         packageJson.main = 'onu/index.js'
         packageJson.dependencies['@onuhq/node'] = TARGET_ONU_NODE_VERSION
         packageJson.dependencies['node-fetch'] = '^2.6.6'
-
-        // add tslib as a dev dependency
-        packageJson.devDependencies.tslib = '^2.5.0'
 
         // add a dev script
         packageJson.scripts.dev = 'npx onu@latest dev'
