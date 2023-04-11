@@ -71,7 +71,8 @@
       "timeoutInDays": 7,
       "message": "<%= config.name %> update available from <%= chalk.greenBright(config.version) %> to <%= chalk.greenBright(latest) %>.",
       "registry": "https://registry.npmjs.org/"
-    }
+    },
+    "additionalVersionFlags": ["-v"]
   },
   "scripts": {
     "build": "shx rm -rf dist && tsc -b",
