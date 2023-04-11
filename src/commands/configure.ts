@@ -3,6 +3,7 @@ import inquirer from 'inquirer'
 import fse from 'fs-extra'
 import {BASE_URL, CONFIG_FILE_PATH} from '../constants'
 import chalk from 'chalk'
+import fetch from 'node-fetch'
 
 export default class Configure extends Command {
   static description = 'Configures the CLI for your project'
