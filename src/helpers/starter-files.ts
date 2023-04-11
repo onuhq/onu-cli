@@ -1,30 +1,3 @@
-export const tsFile = `import {OnuClient} from '@onuhq/node'
-
-const onuClient = new OnuClient({
-  onuPath: __dirname,
-  apiKey: 'YOUR_API_KEY',  // <-- Add your API key here.
-})
-
-onuClient.initializeHttpServer()
-
-// or
-// export default onuClient
-`
-
-export const jsFile = `const onu = require('@onuhq/node')
-
-const onuClient = new onu.OnuClient({
-  onuPath: __dirname,
-  apiKey: 'YOUR_API_KEY',  // <-- Add your API key here.
-})
-
-onuClient.initializeHttpServer()
-
-// or
-// module.exports = {
-//   default: onuClient,
-// }
-`
 
 export const demoTaskTs = `import onu from '@onuhq/node'
 import fetch from 'node-fetch'
@@ -123,6 +96,11 @@ export const tsConfig = `{
 `
 
 export const ONU_DEV_JSON = {
-  onuPath: '',
+  path: '',
   env: {},
+}
+
+export const ONU_DOT_JSON = {
+  path: '',
+  runtime: '',
 }

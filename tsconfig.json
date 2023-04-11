@@ -8,7 +8,7 @@
     "strict": true,
     "target": "es2016",
     "composite": true,
-    "esModuleInterop": true,
+    "esModuleInterop": true
   },
   "include": [
     "src/**/*"

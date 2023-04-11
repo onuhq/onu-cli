@@ -34,10 +34,6 @@ export const execPackageExists = async (): Promise<boolean> => {
   return fse.pathExists(path.join(CMD_EXEC_PATH, 'package.json'))
 }
 
-export const onuDevJsonExists = async (): Promise<boolean> => {
-  return fse.pathExists(path.join(CMD_EXEC_PATH, 'onu.dev.json'))
-}
-
 export const ensureYarn = (command: Command): void => {
   const yarnInstalled = shell.which('yarn')
   if (!yarnInstalled) {
@@ -87,7 +83,7 @@ const addToGitIgnore = () => {
 }
 
 export const checkOnuDevJson = async (command: Command): Promise<void> => {
-  const devJsonExists = await onuDevJsonExists()
+  const devJsonExists = await fse.pathExists(path.join(CMD_EXEC_PATH, 'onu.dev.json'))
 
   if (!devJsonExists) {
     const responses: any = await inquirer.prompt([{
@@ -103,7 +99,7 @@ export const checkOnuDevJson = async (command: Command): Promise<void> => {
       const responses: any = await inquirer.prompt([
         {
           name: 'onuPath',
-          message: 'Enter the path to your onu/ directory',
+          message: 'Enter the path to your onu/ directory. ex: src/onu/',
           type: 'input',
         },
         {
@@ -116,10 +112,10 @@ export const checkOnuDevJson = async (command: Command): Promise<void> => {
       const addGitIgnore = responses.addGitIgnore
 
       if (!onuPath) {
-        command.error('onuPath is required.')
+        command.error('`path` is required.')
       }
 
-      onuDevJson.onuPath = onuPath
+      onuDevJson.path = onuPath
 
       // Write the onu.dev.json file
       fse.writeFileSync(path.join(CMD_EXEC_PATH, 'onu.dev.json'), JSON.stringify(onuDevJson, null, 2))
@@ -134,6 +130,13 @@ export const checkOnuDevJson = async (command: Command): Promise<void> => {
     }
 
     command.error(chalk.red('onu.dev.json is required for the `dev` command.'))
+  }
+
+  // onu.dev.json exists. Check if it has a path
+  const onuDevJson = fse.readJsonSync(path.join(CMD_EXEC_PATH, 'onu.dev.json'))
+
+  if (!onuDevJson.path) {
+    command.error(chalk.yellow('`path` is required in onu.dev.json.'))
   }
 }
 

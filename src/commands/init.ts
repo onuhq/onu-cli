@@ -1,6 +1,6 @@
 import {Command, Flags} from '@oclif/core'
 import fse from 'fs-extra'
-import {ONU_DEV_JSON, demoTaskJs, demoTaskTs, tsConfig, tsFile, jsFile} from '../helpers/starter-files'
+import {ONU_DEV_JSON, demoTaskJs, demoTaskTs, tsConfig} from '../helpers/starter-files'
 import inquirer from 'inquirer'
 import path from 'node:path'
 import {TARGET_ONU_NODE_VERSION} from '../constants'
@@ -73,11 +73,7 @@ export default class Init extends Command {
     switch (flags.language) {
     case 'typescript':
     case 'ts': {
-      let pathName = path.join(basePath, 'index.ts')
-      this.log(`Creating ${pathName} file...`)
-      fse.writeFileSync(pathName, tsFile)
-
-      pathName = path.join(basePath, 'demoTask.ts')
+      const pathName = path.join(basePath, 'demoTask.ts')
       this.log(`Creating ${pathName} file...`)
       fse.writeFileSync(pathName, demoTaskTs)
 
@@ -89,7 +85,7 @@ export default class Init extends Command {
         fse.writeFileSync(path.join(projectName, '.gitignore'), 'node_modules\nonu.dev.json\ndist/\n')
 
         const onuDevJson = JSON.parse(JSON.stringify(ONU_DEV_JSON))
-        onuDevJson.onuPath = '/onu'
+        onuDevJson.path = 'onu/'
         this.log('Creating onu.dev.json file...')
         fse.writeFileSync(path.join(projectName, 'onu.dev.json'), JSON.stringify(onuDevJson, null, 2))
 
@@ -116,14 +112,14 @@ export default class Init extends Command {
         packageJson.devDependencies.typescript = '^5.0.3'
         packageJson.devDependencies['@types/node'] = '^18.15.11'
 
+        // add tslib as a dev dependency
+        packageJson.devDependencies.tslib = '^2.5.0'
+
         // add a build script
         packageJson.scripts.build = 'npx tsc'
 
         // add a dev script
         packageJson.scripts.dev = 'npx onu@latest dev'
-
-        // add a start script
-        packageJson.scripts.start = 'node dist/onu/index.js'
 
         fse.writeFileSync(path.join(projectName, 'package.json'), JSON.stringify(packageJson, null, 2))
 
@@ -137,11 +133,7 @@ export default class Init extends Command {
 
     case 'javascript':
     case 'js': {
-      let pathName = path.join(basePath, 'index.js')
-      this.log(`Creating ${pathName} file...`)
-      fse.writeFileSync(pathName, jsFile)
-
-      pathName = path.join(basePath, 'demoTask.js')
+      const pathName = path.join(basePath, 'demoTask.js')
       this.log(`Creating ${pathName} file...`)
       fse.writeFileSync(pathName, demoTaskJs)
 
@@ -150,7 +142,7 @@ export default class Init extends Command {
         fse.writeFileSync(path.join(projectName, '.gitignore'), 'node_modules\nonu.dev.json\n')
 
         const onuDevJson = JSON.parse(JSON.stringify(ONU_DEV_JSON))
-        onuDevJson.onuPath = '/onu'
+        onuDevJson.path = 'onu/'
         this.log('Creating onu.dev.json file...')
         fse.writeFileSync(path.join(projectName, 'onu.dev.json'), JSON.stringify(onuDevJson, null, 2))
 
@@ -173,11 +165,11 @@ export default class Init extends Command {
         packageJson.dependencies['@onuhq/node'] = TARGET_ONU_NODE_VERSION
         packageJson.dependencies['node-fetch'] = '^2.6.6'
 
+        // add tslib as a dev dependency
+        packageJson.devDependencies.tslib = '^2.5.0'
+
         // add a dev script
         packageJson.scripts.dev = 'npx onu@latest dev'
-
-        // add a start script
-        packageJson.scripts.start = 'node onu/index.js'
 
         fse.writeFileSync(path.join(projectName, 'package.json'), JSON.stringify(packageJson, null, 2))
 

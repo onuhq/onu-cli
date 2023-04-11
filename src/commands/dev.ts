@@ -103,15 +103,10 @@ const runDevStudio = async (command: Command, port: string | undefined, tsconfig
     command.exit(1)
   }
 
-  let isTypescript = false
-  for (const file of fse.readdirSync(CMD_EXEC_PATH)) {
-    if (file === 'tsconfig.json') {
-      isTypescript = true
-    }
-  }
+  const hasTypescriptConfig = await fse.pathExists(path.join(CMD_EXEC_PATH, 'tsconfig.json'))
 
   shell.rm('-rf', TS_FILES_DIST_PATH)
-  if (isTypescript) {
+  if (hasTypescriptConfig) {
     // compile the files
     const tsConfigFilePath = tsconfig || 'tsconfig.json'
     const tscAliasCommand = `&& npx --yes tsc-alias -p ${tsConfigFilePath} --outDir ${TS_FILES_DIST_PATH}`
@@ -151,7 +146,7 @@ const runDevStudio = async (command: Command, port: string | undefined, tsconfig
 }
 
 const runSite = async (command: Command, port: string) => {
-  // get the onuPath from the onu.dev.json file
+  // get the path from the onu.dev.json file
   const onuDevJson = JSON.parse(fse.readFileSync(ONU_DEV_JSON_PATH, 'utf8'))
   onuDevJson.env = onuDevJson.env || {}
   shell.cd(CLIENT_PATH)
@@ -167,7 +162,7 @@ const runSite = async (command: Command, port: string) => {
     env: {
       ...process.env,
       PORT: port,
-      ONU_PATH: path.join(TS_FILES_DIST_PATH, onuDevJson.onuPath),
+      ONU_PATH: path.join(TS_FILES_DIST_PATH, onuDevJson.path),
       ...onuDevJson.env,
     },
     cwd: CLIENT_PATH,

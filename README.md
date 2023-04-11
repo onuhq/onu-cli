@@ -13,7 +13,7 @@ $ npm install -g onu
 $ onu COMMAND
 running command...
 $ onu (--version)
-onu/0.2.1 darwin-x64 node-v18.0.0
+onu/0.3.0 darwin-x64 node-v18.0.0
 $ onu --help [COMMAND]
 USAGE
   $ onu COMMAND
@@ -22,10 +22,46 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
+* [`onu configure`](#onu-configure)
+* [`onu deploy`](#onu-deploy)
 * [`onu dev [-p <value>]`](#onu-dev--p-value)
 * [`onu help [COMMANDS]`](#onu-help-commands)
 * [`onu init`](#onu-init)
 * [`onu sos`](#onu-sos)
+
+## `onu configure`
+
+Configures the CLI for your project
+
+```
+USAGE
+  $ onu configure
+
+DESCRIPTION
+  Configures the CLI for your project
+
+EXAMPLES
+  $ onu configure
+```
+
+_See code: [dist/commands/configure.ts](https://github.com/onuhq/onu-cli/blob/v0.3.0/dist/commands/configure.ts)_
+
+## `onu deploy`
+
+Deploy your Onu tasks
+
+```
+USAGE
+  $ onu deploy
+
+DESCRIPTION
+  Deploy your Onu tasks
+
+EXAMPLES
+  $ onu deploy
+```
+
+_See code: [dist/commands/deploy.ts](https://github.com/onuhq/onu-cli/blob/v0.3.0/dist/commands/deploy.ts)_
 
 ## `onu dev [-p <value>]`
 
@@ -47,7 +83,7 @@ EXAMPLES
   $ onu dev -p 8000
 ```
 
-_See code: [dist/commands/dev.ts](https://github.com/onuhq/onu-cli/blob/v0.2.1/dist/commands/dev.ts)_
+_See code: [dist/commands/dev.ts](https://github.com/onuhq/onu-cli/blob/v0.3.0/dist/commands/dev.ts)_
 
 ## `onu help [COMMANDS]`
 
@@ -87,7 +123,7 @@ EXAMPLES
   $ onu init -l typescript
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/onuhq/onu-cli/blob/v0.2.1/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/onuhq/onu-cli/blob/v0.3.0/dist/commands/init.ts)_
 
 ## `onu sos`
 
@@ -104,5 +140,5 @@ EXAMPLES
   $ onu sos
 ```
 
-_See code: [dist/commands/sos.ts](https://github.com/onuhq/onu-cli/blob/v0.2.1/dist/commands/sos.ts)_
+_See code: [dist/commands/sos.ts](https://github.com/onuhq/onu-cli/blob/v0.3.0/dist/commands/sos.ts)_
 <!-- commandsstop -->
