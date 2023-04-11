@@ -7,7 +7,7 @@ import {isInternetAvailable} from 'is-internet-available'
 import path from 'node:path'
 import fse from 'fs-extra'
 import {CLIENT_PATH, CMD_EXEC_PATH, DEV_CACHE_PATH, HOME_DIR, ONU_DEV_JSON_PATH, STUDIO_PATH, TARGET_STUDIO_VERSION, TS_FILES_DIST_PATH, VERSION_PATH} from '../constants'
-import {checkPortRecursive, ensureYarn, studioNodeModulesExists, promptForYarn, execNodeModulesExists, execPackageExists, checkOnuDevJson} from '../helpers'
+import {checkPortRecursive, ensureYarn, studioNodeModulesExists, promptForYarn, execNodeModulesExists, execPackageExists, checkOnuDevJson, installDependencies} from '../helpers'
 import chalk from 'chalk'
 import open from 'open'
 
@@ -89,13 +89,13 @@ const runDevStudio = async (command: Command, port: string | undefined, tsconfig
     if (!internet) {
       ux.action.stop(`Dependencies are missing and you are offline. Connect to the internet and run
   
-      onu install
+      onu dev --install-deps
       
       `)
     } else {
       ux.action.stop(`Dependencies were not installed correctly, run
   
-      onu install
+      onu dev --install-deps
       
       `)
     }
@@ -216,6 +216,7 @@ export default class Dev extends Command {
     port: Flags.integer({char: 'p', description: 'Port to run on', default: 3000}),
     help: Flags.boolean({char: 'h', description: 'Show help'}),
     tsconfig: Flags.string({char: 't', description: 'Path to a custom tsconfig file', default: './tsconfig.json'}),
+    'install-deps': Flags.boolean({description: 'Re-install the studio app dependencies'}),
   }
 
   public async run(): Promise<void> {
@@ -240,6 +241,16 @@ export default class Dev extends Command {
 
     if (!port) {
       this.error('No available port found.')
+    }
+
+    const internet = await isInternetAvailable()
+
+    if (!internet && flags['install-deps']) {
+      this.error('You must be connected to the internet to install dependencies.')
+    }
+
+    if (flags['install-deps']) {
+      await installDependencies(this)
     }
 
     await runDevStudio(this, port.toString(), flags.tsconfig)
