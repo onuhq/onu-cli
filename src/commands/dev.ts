@@ -89,13 +89,13 @@ const runDevStudio = async (command: Command, port: string | undefined, tsconfig
     if (!internet) {
       ux.action.stop(`Dependencies are missing and you are offline. Connect to the internet and run
   
-      onu dev --install-deps
+      npx onu@latest dev --install-deps
       
       `)
     } else {
       ux.action.stop(`Dependencies were not installed correctly, run
   
-      onu dev --install-deps
+      npx onu@latest dev --install-deps
       
       `)
     }
@@ -179,6 +179,10 @@ const runSite = async (command: Command, port: string) => {
         chalk.green('Press Ctrl+C any time to stop the local studio.'),
       )
       await open(`http://localhost:${port}`)
+    }
+
+    if (output.includes('[debug][onu]')) {
+      console.log(output)
     }
   })
 
