@@ -1,7 +1,7 @@
 import {Command, Flags, Help, ux} from '@oclif/core'
 import {Octokit} from '@octokit/rest'
 import shell from 'shelljs'
-import childProcess from 'node:child_process'
+import childProcess, {ChildProcess} from 'node:child_process'
 // @ts-ignore
 import {isInternetAvailable} from 'is-internet-available'
 import path from 'node:path'
@@ -46,6 +46,9 @@ const downloadTargetOnuStudio = async (command: Command) => {
   // Delete unnecessary content downloaded from GitHub
   fse.removeSync(path.join(STUDIO_PATH, 'onu-tmp'))
 
+  // add an empty tasks.json file to avoid errors
+  fse.writeFileSync(path.join(CLIENT_PATH, 'tasks.json'), '[]')
+
   command.log('Installing dependencies...')
 
   ensureYarn(command)
@@ -53,7 +56,7 @@ const downloadTargetOnuStudio = async (command: Command) => {
   shell.exec('yarn', {silent: true})
 }
 
-const refreshFiles = async (command: Command, installDeps: boolean, tsconfig?: string) => {
+const refreshFiles = async (command: Command, installDeps: boolean, tsconfig?: string, onuStudioProcess?: ChildProcess) => {
   const hasTypescriptConfig = await fse.pathExists(path.join(CMD_EXEC_PATH, 'tsconfig.json'))
 
   if (installDeps) {
@@ -75,7 +78,11 @@ const refreshFiles = async (command: Command, installDeps: boolean, tsconfig?: s
       console.log(typescriptProcess.stdout.toString())
       console.log(typescriptProcess.stderr.toString())
       console.log('There was an error compiling your Typescript files')
-      command.exit(1)
+      if (onuStudioProcess) {
+        console.log(chalk.red(`Your changes were not synced. Please check any errors above and try again. \n\nTo avoid unexpected behavior, press ${chalk.bold('CTRL + C')} to exit the Onu Studio process and then run ${chalk.bold('onu dev')} again.`))
+      } else {
+        command.exit(1)
+      }
     }
 
     if (installDeps) {
@@ -83,9 +90,8 @@ const refreshFiles = async (command: Command, installDeps: boolean, tsconfig?: s
       shell.cp('-R', path.join(CMD_EXEC_PATH, 'package.json'), TS_FILES_DIST_PATH)
       shell.cd(TS_FILES_DIST_PATH)
       shell.exec('yarn', {silent: true})
+      command.log('Compiled Typescript files')
     }
-
-    command.log('Compiled Typescript files')
   } else {
     const rsyncProcess = childProcess.spawnSync('rsync', ['-a', '--exclude=node_modules', '--exclude=.git', CMD_EXEC_PATH + '/', TS_FILES_DIST_PATH], {
       shell: true,
@@ -108,7 +114,23 @@ const refreshFiles = async (command: Command, installDeps: boolean, tsconfig?: s
   }
 }
 
-const listener = async (command: Command, port: string,  tsconfig?: string) => {
+const performHotReload = async (command: Command, onuStudioProcess: ChildProcess, tsconfig?: string) => {
+  ux.action.start('Refreshing local Onu Studio instance...')
+  await refreshFiles(command, false, tsconfig, onuStudioProcess)
+  shell.cd(CLIENT_PATH)
+  const onuDevJson = getOnuDevJson()
+  childProcess.spawnSync('yarn preconfigure', {
+    shell: true,
+    env: {
+      ...process.env,
+      ONU_PATH: path.join(TS_FILES_DIST_PATH, onuDevJson.path),
+      ...onuDevJson.env,
+    },
+  })
+  ux.action.stop()
+}
+
+const listener = async (command: Command, onuStudioProcess: ChildProcess, tsconfig?: string) => {
   const watcher = chokidar
   .watch(CMD_EXEC_PATH, {
     ignoreInitial: true,
@@ -116,28 +138,23 @@ const listener = async (command: Command, port: string,  tsconfig?: string) => {
     cwd: CMD_EXEC_PATH,
   })
   .on('add', async (filename: string) => {
-    console.log('add event:', filename)
+    console.log(chalk.magenta('\nfile added:', filename))
+    await performHotReload(command, onuStudioProcess, tsconfig)
   })
   .on('change', async (filename: string) => {
-    console.log('change event:', filename)
-    await refreshFiles(command, false, tsconfig)
-    shell.cd(CLIENT_PATH)
-    const onuDevJson = getOnuDevJson()
-    childProcess.spawnSync('yarn preconfigure', {
-      shell: true,
-      env: {
-        ...process.env,
-        PORT: port,
-        ONU_PATH: path.join(TS_FILES_DIST_PATH, onuDevJson.path),
-        ...onuDevJson.env,
-      },
-    })
+    console.log(chalk.magenta('\nfile changed:', filename))
+    await performHotReload(command, onuStudioProcess, tsconfig)
   })
   .on('unlink', async (filename: string) => {
-    console.log('unlink event:', filename)
+    console.log(chalk.magenta('\nfile removed:', filename))
+    await performHotReload(command, onuStudioProcess, tsconfig)
   })
 
   process.on('SIGINT', () => {
+    watcher.close()
+  })
+
+  process.on('SIGTERM', () => {
     watcher.close()
   })
 }
@@ -193,7 +210,7 @@ const runDevStudio = async (command: Command, port: string | undefined, tsconfig
     command.exit(1)
   }
 
-  refreshFiles(command, true, tsconfig)
+  await refreshFiles(command, true, tsconfig)
 
   // remove the devCache file
   shell.rm('-rf', DEV_CACHE_PATH)
@@ -254,8 +271,6 @@ const runSite = async (command: Command, port: string, tsconfig: string | undefi
       await open(`http://localhost:${port}`)
     }
 
-    console.log(output)
-
     if (output.includes('[debug][onu]')) {
       console.log(output)
     }
@@ -269,7 +284,7 @@ const runSite = async (command: Command, port: string, tsconfig: string | undefi
 
     console.log(output)
   })
-  const onExit = (signal: 'SIGINT' | 'SIGTERM') => {
+  const onExit = (signal?: 'SIGINT' | 'SIGTERM') => {
     if (signal === 'SIGINT') {
       command.log(chalk.magenta('\n✨ Successfully exited Onu Studio\n'))
     }
@@ -277,9 +292,12 @@ const runSite = async (command: Command, port: string, tsconfig: string | undefi
     onuStudioProcess.kill('SIGINT')
   }
 
+  onuStudioProcess.on('SIGKILL', () => command.exit())
+
   process.on('SIGINT', () => onExit('SIGINT'))
   process.on('SIGTERM', () => onExit('SIGTERM'))
-  listener(command, port, tsconfig)
+
+  listener(command, onuStudioProcess, tsconfig)
 }
 
 export default class Dev extends Command {
