@@ -1,7 +1,7 @@
 import {Command, Flags, Help, ux} from '@oclif/core'
 import {Octokit} from '@octokit/rest'
 import shell from 'shelljs'
-import childProcess from 'node:child_process'
+import childProcess, {ChildProcess} from 'node:child_process'
 // @ts-ignore
 import {isInternetAvailable} from 'is-internet-available'
 import path from 'node:path'
@@ -10,6 +10,7 @@ import {CLIENT_PATH, CMD_EXEC_PATH, DEV_CACHE_PATH, HOME_DIR, ONU_DEV_JSON_PATH,
 import {checkPortRecursive, ensureYarn, studioNodeModulesExists, promptForYarn, execNodeModulesExists, execPackageExists, checkOnuDevJson, installDependencies} from '../helpers'
 import chalk from 'chalk'
 import open from 'open'
+import chokidar from 'chokidar'
 
 const downloadTargetOnuStudio = async (command: Command) => {
   fse.emptyDirSync(STUDIO_PATH)
@@ -45,11 +46,117 @@ const downloadTargetOnuStudio = async (command: Command) => {
   // Delete unnecessary content downloaded from GitHub
   fse.removeSync(path.join(STUDIO_PATH, 'onu-tmp'))
 
+  // add an empty tasks.json file to avoid errors
+  fse.writeFileSync(path.join(CLIENT_PATH, 'tasks.json'), '[]')
+
   command.log('Installing dependencies...')
 
   ensureYarn(command)
   shell.cd(CLIENT_PATH)
   shell.exec('yarn', {silent: true})
+}
+
+const refreshFiles = async (command: Command, installDeps: boolean, tsconfig?: string, onuStudioProcess?: ChildProcess) => {
+  const hasTypescriptConfig = await fse.pathExists(path.join(CMD_EXEC_PATH, 'tsconfig.json'))
+
+  if (installDeps) {
+    shell.rm('-rf', TS_FILES_DIST_PATH)
+  }
+
+  if (hasTypescriptConfig) {
+    // compile the files
+    const tsConfigFilePath = tsconfig || 'tsconfig.json'
+    const tscAliasCommand = `&& npx --yes tsc-alias -p ${tsConfigFilePath} --outDir ${TS_FILES_DIST_PATH}`
+    const typescriptProcess = childProcess.spawnSync(`npx --yes tsc -p ${tsConfigFilePath} --outDir ${TS_FILES_DIST_PATH} ${tscAliasCommand}`, [], {
+      shell: true,
+      cwd: CMD_EXEC_PATH,
+      stdio: 'pipe',
+    })
+
+    if (typescriptProcess.status !== 0) {
+      ux.action.stop()
+      console.log(typescriptProcess.stdout.toString())
+      console.log(typescriptProcess.stderr.toString())
+      console.log('There was an error compiling your Typescript files')
+      if (onuStudioProcess) {
+        console.log(chalk.red(`Your changes were not synced. Please check any errors above and try again. \n\nTo avoid unexpected behavior, press ${chalk.bold('CTRL + C')} to exit the Onu Studio process and then run ${chalk.bold('onu dev')} again.`))
+      } else {
+        command.exit(1)
+      }
+    }
+
+    if (installDeps) {
+      // install node modules
+      shell.cp('-R', path.join(CMD_EXEC_PATH, 'package.json'), TS_FILES_DIST_PATH)
+      shell.cd(TS_FILES_DIST_PATH)
+      shell.exec('yarn', {silent: true})
+      command.log('Compiled Typescript files')
+    }
+  } else {
+    const rsyncProcess = childProcess.spawnSync('rsync', ['-a', '--exclude=node_modules', '--exclude=.git', CMD_EXEC_PATH + '/', TS_FILES_DIST_PATH], {
+      shell: true,
+      cwd: CMD_EXEC_PATH,
+      stdio: 'pipe',
+    })
+    if (rsyncProcess.status !== 0) {
+      ux.action.stop()
+      console.log(rsyncProcess.stdout.toString())
+      console.log(rsyncProcess.stderr.toString())
+      console.log('There was an error syncing your Javascript files')
+      command.exit(1)
+    }
+
+    if (installDeps) {
+      // install node modules
+      shell.cd(TS_FILES_DIST_PATH)
+      shell.exec('yarn', {silent: true})
+    }
+  }
+}
+
+const performHotReload = async (command: Command, onuStudioProcess: ChildProcess, tsconfig?: string) => {
+  ux.action.start('Refreshing local Onu Studio instance...')
+  await refreshFiles(command, false, tsconfig, onuStudioProcess)
+  shell.cd(CLIENT_PATH)
+  const onuDevJson = getOnuDevJson()
+  childProcess.spawnSync('yarn preconfigure', {
+    shell: true,
+    env: {
+      ...process.env,
+      ONU_PATH: path.join(TS_FILES_DIST_PATH, onuDevJson.path),
+      ...onuDevJson.env,
+    },
+  })
+  ux.action.stop()
+}
+
+const listener = async (command: Command, onuStudioProcess: ChildProcess, tsconfig?: string) => {
+  const watcher = chokidar
+  .watch(CMD_EXEC_PATH, {
+    ignoreInitial: true,
+    ignored: ['node_modules', '.git', '.idea', '.vscode'],
+    cwd: CMD_EXEC_PATH,
+  })
+  .on('add', async (filename: string) => {
+    console.log(chalk.magenta('\nfile added:', filename))
+    await performHotReload(command, onuStudioProcess, tsconfig)
+  })
+  .on('change', async (filename: string) => {
+    console.log(chalk.magenta('\nfile changed:', filename))
+    await performHotReload(command, onuStudioProcess, tsconfig)
+  })
+  .on('unlink', async (filename: string) => {
+    console.log(chalk.magenta('\nfile removed:', filename))
+    await performHotReload(command, onuStudioProcess, tsconfig)
+  })
+
+  process.on('SIGINT', () => {
+    watcher.close()
+  })
+
+  process.on('SIGTERM', () => {
+    watcher.close()
+  })
 }
 
 const runDevStudio = async (command: Command, port: string | undefined, tsconfig: string | undefined) => {
@@ -103,60 +210,43 @@ const runDevStudio = async (command: Command, port: string | undefined, tsconfig
     command.exit(1)
   }
 
-  const hasTypescriptConfig = await fse.pathExists(path.join(CMD_EXEC_PATH, 'tsconfig.json'))
-
-  shell.rm('-rf', TS_FILES_DIST_PATH)
-  if (hasTypescriptConfig) {
-    // compile the files
-    const tsConfigFilePath = tsconfig || 'tsconfig.json'
-    const tscAliasCommand = `&& npx --yes tsc-alias -p ${tsConfigFilePath} --outDir ${TS_FILES_DIST_PATH}`
-    const typescriptProcess = childProcess.spawnSync(`npx --yes tsc -p ${tsConfigFilePath} --outDir ${TS_FILES_DIST_PATH} ${tscAliasCommand}`, [], {
-      shell: true,
-      cwd: CMD_EXEC_PATH,
-      stdio: 'pipe',
-    })
-
-    if (typescriptProcess.status !== 0) {
-      ux.action.stop()
-      console.log(typescriptProcess.stdout.toString())
-      console.log(typescriptProcess.stderr.toString())
-      console.log('There was an error compiling your Typescript files')
-      command.exit(1)
-    }
-
-    // install node modules
-    shell.cp('-R', path.join(CMD_EXEC_PATH, 'package.json'), TS_FILES_DIST_PATH)
-    shell.cd(TS_FILES_DIST_PATH)
-    shell.exec('yarn', {silent: true})
-
-    command.log('Compiled Typescript files')
-  } else {
-    shell.cp('-R', CMD_EXEC_PATH, TS_FILES_DIST_PATH)
-  }
+  await refreshFiles(command, true, tsconfig)
 
   // remove the devCache file
   shell.rm('-rf', DEV_CACHE_PATH)
 
   shell.cd(CLIENT_PATH)
-  const relativePath = path.relative(CLIENT_PATH, CMD_EXEC_PATH)
-  childProcess.spawnSync('yarn preconfigure', [relativePath], {shell: true})
+  const onuDevJson = getOnuDevJson()
+  childProcess.spawnSync('yarn preconfigure', {shell: true,
+    env: {
+      ...process.env,
+      PORT: port,
+      ONU_PATH: path.join(TS_FILES_DIST_PATH, onuDevJson.path),
+      ...onuDevJson.env,
+    },
+  })
   ux.action.stop('done')
   command.log('Local Onu Studio instance is ready. Launching your site...')
-  await runSite(command, (port as string) || '3000')
+  await runSite(command, (port as string) || '3000', tsconfig)
 }
 
-const runSite = async (command: Command, port: string) => {
-  // get the path from the onu.dev.json file
+const getOnuDevJson = () => {
   const onuDevJson = JSON.parse(fse.readFileSync(ONU_DEV_JSON_PATH, 'utf8'))
   onuDevJson.env = onuDevJson.env || {}
-  shell.cd(CLIENT_PATH)
-
   for (const key in onuDevJson.env) {
     // if the value if an object, stringify it
     if (typeof onuDevJson.env[key] === 'object') {
       onuDevJson.env[key] = JSON.stringify(onuDevJson.env[key])
     }
   }
+
+  return onuDevJson
+}
+
+const runSite = async (command: Command, port: string, tsconfig: string | undefined) => {
+  // get the path from the onu.dev.json file
+  const onuDevJson = getOnuDevJson()
+  shell.cd(CLIENT_PATH)
 
   const onuStudioProcess = childProcess.spawn('npm run dev', {
     env: {
@@ -194,7 +284,7 @@ const runSite = async (command: Command, port: string) => {
 
     console.log(output)
   })
-  const onExit = (signal: 'SIGINT' | 'SIGTERM') => {
+  const onExit = (signal?: 'SIGINT' | 'SIGTERM') => {
     if (signal === 'SIGINT') {
       command.log(chalk.magenta('\n✨ Successfully exited Onu Studio\n'))
     }
@@ -202,9 +292,12 @@ const runSite = async (command: Command, port: string) => {
     onuStudioProcess.kill('SIGINT')
   }
 
+  onuStudioProcess.on('SIGKILL', () => command.exit())
+
   process.on('SIGINT', () => onExit('SIGINT'))
   process.on('SIGTERM', () => onExit('SIGTERM'))
-  // listener()
+
+  listener(command, onuStudioProcess, tsconfig)
 }
 
 export default class Dev extends Command {
