@@ -1,7 +1,7 @@
 import {Command, ux} from '@oclif/core'
 import inquirer from 'inquirer'
 import fse from 'fs-extra'
-import {BASE_URL, CONFIG_FILE_PATH} from '../constants'
+import {BASE_URL, CONFIG_FILE_PATH, DOT_ONU} from '../constants'
 import chalk from 'chalk'
 import fetch from 'node-fetch'
 
@@ -36,6 +36,10 @@ export default class Configure extends Command {
     if (resp.status === 200) {
       ux.action.stop('API key is valid')
       ux.action.start('Storing configuration')
+
+      // Ensure the .onu directory exists
+      await fse.ensureDir(DOT_ONU)
+
       const configFileExists = await fse.pathExists(CONFIG_FILE_PATH)
       if (!configFileExists) {
         await fse.writeFile(CONFIG_FILE_PATH, JSON.stringify({}))
