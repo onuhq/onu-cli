@@ -21,7 +21,7 @@ const task = new onu.Task({
   run: async (input, context) => {
     const {email, accountType} = input
 
-    // You can import and use your project's existing code $ business logic.
+    // You can import and use your project's existing code & business logic.
     // For the purposes of this demo, we'll just make a call to Onu's demo API
     const response = await fetch('https://demo.joinonu.com/api/onboard', {
       method: 'POST',
@@ -62,7 +62,7 @@ const task = new onu.Task({
   run: async (input, context) => {
     const {email, accountType} = input
 
-    // You can import and use your project's existing code $ business logic.
+    // You can import and use your project's existing code & business logic.
     // For the purposes of this demo, we'll just make a call to Onu's demo API
     const response = await fetch('https://demo.joinonu.com/api/onboard', {
       method: 'POST',
