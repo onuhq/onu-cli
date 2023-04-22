@@ -46,7 +46,7 @@
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.18.23",
     "@types/node-fetch": "^2.6.3",
-    "@types/shelljs": "^0.8.11",
+    "@types/shelljs": "^0.8.12",
     "chai": "^4",
     "eslint": "^7.32.0",
     "eslint-config-oclif": "^4",
