@@ -152,7 +152,7 @@ export default class Deploy extends Command {
     }, 7 * 60 * 1000) // 7 minutes
 
     try {
-      const response = await fetch(`${BASE_URL}/v1/cli/deploy2`, {
+      const response = await fetch(`${BASE_URL}/v1/cli/deploy`, {
         method: 'POST',
         body: formData,
         signal: controller.signal as any,

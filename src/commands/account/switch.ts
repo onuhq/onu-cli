@@ -35,6 +35,10 @@ export default class Switch extends Command {
     }
 
     const orgIds = Object.keys(config.auth)
+    if (orgIds.length === 0) {
+      this.error('No accounts found. Run `onu configure` to login to your Onu account.', {exit: 1})
+    }
+
     const orgs: Org[] = []
 
     await Promise.all(
@@ -76,7 +80,6 @@ export default class Switch extends Command {
               name: data.orgName,
             }
           } else if (resp.status === 401) {
-            console.log(chalk.red(`API key for og ${orgId} is invalid. Removing from config file.`))
             // Delete this org from the config file
             delete config.auth[orgId]
             delete config.orgInfo[orgId]
