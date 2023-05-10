@@ -12,8 +12,8 @@ Onu CLI
 $ npm install -g onu
 $ onu COMMAND
 running command...
-$ onu (--version)
-onu/0.3.0 darwin-x64 node-v18.0.0
+$ onu (--version|-v)
+onu/0.3.5 darwin-x64 node-v18.0.0
 $ onu --help [COMMAND]
 USAGE
   $ onu COMMAND
@@ -22,50 +22,67 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
+* [`onu accounts switch`](#onu-accounts-switch)
 * [`onu configure`](#onu-configure)
 * [`onu deploy`](#onu-deploy)
 * [`onu dev [-p <value>]`](#onu-dev--p-value)
 * [`onu help [COMMANDS]`](#onu-help-commands)
 * [`onu init`](#onu-init)
 * [`onu sos`](#onu-sos)
+* [`onu whoami`](#onu-whoami)
+
+## `onu accounts switch`
+
+manage the current account
+
+```
+USAGE
+  $ onu accounts switch
+
+DESCRIPTION
+  manage the current account
+
+EXAMPLES
+  $ onu accounts switch
+```
 
 ## `onu configure`
 
-Configures the CLI for your project
+configure the CLI for your project
 
 ```
 USAGE
   $ onu configure
 
 DESCRIPTION
-  Configures the CLI for your project
+  configure the CLI for your project
 
 EXAMPLES
   $ onu configure
 ```
 
-_See code: [dist/commands/configure.ts](https://github.com/onuhq/onu-cli/blob/v0.3.0/dist/commands/configure.ts)_
+_See code: [dist/commands/configure.ts](https://github.com/onuhq/onu-cli/blob/v0.3.5/dist/commands/configure.ts)_
 
 ## `onu deploy`
 
-Deploy your Onu tasks
+deploy your Onu tasks
 
 ```
 USAGE
   $ onu deploy
 
 DESCRIPTION
-  Deploy your Onu tasks
+  deploy your Onu tasks
 
 EXAMPLES
   $ onu deploy
 ```
 
-_See code: [dist/commands/deploy.ts](https://github.com/onuhq/onu-cli/blob/v0.3.0/dist/commands/deploy.ts)_
+_See code: [dist/commands/deploy.ts](https://github.com/onuhq/onu-cli/blob/v0.3.5/dist/commands/deploy.ts)_
 
 ## `onu dev [-p <value>]`
 
-Runs a local dev studio [experimental 🧪]
+run a local dev studio [experimental 🧪]
 
 ```
 USAGE
@@ -75,15 +92,16 @@ FLAGS
   -h, --help              Show help
   -p, --port=<value>      [default: 3000] Port to run on
   -t, --tsconfig=<value>  [default: ./tsconfig.json] Path to a custom tsconfig file
+  --install-deps          Re-install the studio app dependencies
 
 DESCRIPTION
-  Runs a local dev studio [experimental 🧪]
+  run a local dev studio [experimental 🧪]
 
 EXAMPLES
   $ onu dev -p 8000
 ```
 
-_See code: [dist/commands/dev.ts](https://github.com/onuhq/onu-cli/blob/v0.3.0/dist/commands/dev.ts)_
+_See code: [dist/commands/dev.ts](https://github.com/onuhq/onu-cli/blob/v0.3.5/dist/commands/dev.ts)_
 
 ## `onu help [COMMANDS]`
 
@@ -107,7 +125,7 @@ _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.8
 
 ## `onu init`
 
-Initializes an `onu/` directory within the current project
+initialize an `onu/` directory within the current project
 
 ```
 USAGE
@@ -117,28 +135,45 @@ FLAGS
   -l, --language=<value>  (required) The language to generate files in
 
 DESCRIPTION
-  Initializes an `onu/` directory within the current project
+  initialize an `onu/` directory within the current project
 
 EXAMPLES
   $ onu init -l typescript
 ```
 
-_See code: [dist/commands/init.ts](https://github.com/onuhq/onu-cli/blob/v0.3.0/dist/commands/init.ts)_
+_See code: [dist/commands/init.ts](https://github.com/onuhq/onu-cli/blob/v0.3.5/dist/commands/init.ts)_
 
 ## `onu sos`
 
-Displays contact information for the Onu team
+display contact information for the Onu team
 
 ```
 USAGE
   $ onu sos
 
 DESCRIPTION
-  Displays contact information for the Onu team
+  display contact information for the Onu team
 
 EXAMPLES
   $ onu sos
 ```
 
-_See code: [dist/commands/sos.ts](https://github.com/onuhq/onu-cli/blob/v0.3.0/dist/commands/sos.ts)_
+_See code: [dist/commands/sos.ts](https://github.com/onuhq/onu-cli/blob/v0.3.5/dist/commands/sos.ts)_
+
+## `onu whoami`
+
+show the org you are currently logged in as
+
+```
+USAGE
+  $ onu whoami
+
+DESCRIPTION
+  show the org you are currently logged in as
+
+EXAMPLES
+  $ onu whoami
+```
+
+_See code: [dist/commands/whoami.ts](https://github.com/onuhq/onu-cli/blob/v0.3.5/dist/commands/whoami.ts)_
 <!-- commandsstop -->

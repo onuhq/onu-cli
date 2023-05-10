@@ -1,12 +1,12 @@
 import {Command, ux} from '@oclif/core'
 import inquirer from 'inquirer'
 import fse from 'fs-extra'
-import {BASE_URL, CONFIG_FILE_PATH, DOT_ONU} from '../constants'
+import {BASE_URL, CONFIG_FILE_PATH, DOT_ONU, OnuConfig} from '../constants'
 import chalk from 'chalk'
 import fetch from 'node-fetch'
 
 export default class Configure extends Command {
-  static description = 'Configures the CLI for your project'
+  static description = 'configure the CLI for your project'
 
   static examples = [
     '<%= config.bin %> <%= command.id %>',
@@ -47,14 +47,23 @@ export default class Configure extends Command {
 
       const data = await resp.json()
 
-      const config = await fse.readJSON(CONFIG_FILE_PATH)
+      const config: OnuConfig = await fse.readJSON(CONFIG_FILE_PATH)
 
       if (!config.auth) {
         config.auth = {}
       }
 
+      if (!config.orgInfo) {
+        config.orgInfo = {}
+      }
+
       config.auth[data.orgId] = apiKey
       config.currentOrg = data.orgId
+      if (data.orgName) {
+        config.orgInfo[data.orgId] = {
+          name: data.orgName,
+        }
+      }
 
       await fse.writeJSON(CONFIG_FILE_PATH, config, {spaces: 2})
       ux.action.stop('Configuration stored')
