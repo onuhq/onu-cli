@@ -3,7 +3,7 @@ import {Table} from 'console-table-printer'
 import open from 'open'
 
 export default class Sos extends Command {
-  static description = 'Displays contact information for the Onu team'
+  static description = 'display contact information for the Onu team'
 
   static examples = [
     '<%= config.bin %> <%= command.id %>',

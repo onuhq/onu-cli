@@ -9,6 +9,7 @@ import chalk from 'chalk'
 import shell from 'shelljs'
 import FormData from 'form-data'
 import fetch from 'node-fetch'
+import {AbortController} from 'abort-controller'
 
 export const checkOnuDotJson = async (command: Command): Promise<void> => {
   // Check if the onu.json file exists
@@ -69,7 +70,7 @@ export const checkOnuDotJson = async (command: Command): Promise<void> => {
 }
 
 export default class Deploy extends Command {
-  static description = 'Deploy your Onu tasks'
+  static description = 'deploy your Onu tasks'
 
   static examples = [
     '<%= config.bin %> <%= command.id %>',
@@ -131,7 +132,7 @@ export default class Deploy extends Command {
     shell.exec(tarCommand, {silent: true})
 
     ux.action.stop('done')
-    ux.action.start('Deploying tasks')
+    ux.action.start('Deploying tasks - this will take a few minutes')
 
     // get the api key from the config
     const currentOrg = config.currentOrg
@@ -145,24 +146,40 @@ export default class Deploy extends Command {
     formData.append('onuPath', onuDotJson.path)
     formData.append('runtime', onuDotJson.runtime || undefined)
 
-    const response = await fetch(`${BASE_URL}/v1/cli/deploy`, {
-      method: 'POST',
-      body: formData,
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-      },
-    })
+    const controller = new AbortController()
+    const timeout = setTimeout(() => {
+      controller.abort()
+    }, 7 * 60 * 1000) // 7 minutes
 
-    if (response.status === 401) {
-      this.error(chalk.red('Unauthorized. Please run `onu configure` to login to your Onu account.'), {exit: 1})
+    try {
+      const response = await fetch(`${BASE_URL}/v1/cli/deploy`, {
+        method: 'POST',
+        body: formData,
+        signal: controller.signal as any,
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+      })
+
+      if (response.status === 401) {
+        this.error(chalk.red('Unauthorized. Please run `onu configure` to login to your Onu account.'), {exit: 1})
+      }
+
+      const json = await response.json()
+
+      if (response.status !== 200) {
+        this.error(chalk.red(json), {exit: 1})
+      }
+
+      this.log(json)
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        this.error(chalk.red('Request aborted due to timeout'), {exit: 1})
+      }
+
+      this.error(chalk.red(error), {exit: 1})
+    } finally {
+      clearTimeout(timeout)
     }
-
-    const json = await response.json()
-
-    if (response.status !== 200) {
-      this.error(chalk.red(json), {exit: 1})
-    }
-
-    this.log(json)
   }
 }

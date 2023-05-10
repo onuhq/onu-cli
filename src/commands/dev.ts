@@ -301,7 +301,7 @@ const runSite = async (command: Command, port: string, tsconfig: string | undefi
 }
 
 export default class Dev extends Command {
-  static description = 'Runs a local dev studio [experimental 🧪]'
+  static description = 'run a local dev studio [experimental 🧪]'
 
   static examples = [
     '<%= config.bin %> <%= command.id %> -p 8000',

@@ -22,3 +22,15 @@ export const DEV_CACHE_PATH = path.join(CLIENT_PATH, 'devCache')
 
 export const BASE_URL = 'https://api.joinonu.com'
 // export const BASE_URL = 'http://localhost:8080'
+
+export interface OnuConfig {
+  auth?: {
+    [key: string]: string
+  }
+  currentOrg?: string
+  orgInfo?: {
+    [key: string]: {
+      name: string
+    }
+  }
+}

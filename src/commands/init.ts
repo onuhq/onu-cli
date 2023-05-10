@@ -8,7 +8,7 @@ import {installProjectDeps} from '../helpers'
 import chalk from 'chalk'
 
 export default class Init extends Command {
-  static description = 'Initializes an `onu/` directory within the current project'
+  static description = 'initialize an `onu/` directory within the current project'
 
   static examples = [
     '$ <%= config.bin %> <%= command.id %> -l typescript',
