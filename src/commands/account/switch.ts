@@ -62,37 +62,33 @@ export default class Switch extends Command {
 
         let shouldAddOrg = true
 
-        if (!config.orgInfo[orgId]) {
-          const resp = await fetch(`${BASE_URL}/v1/cli/auth/validate`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${apiKey}`,
-            },
-          })
+        const resp = await fetch(`${BASE_URL}/v1/cli/auth/validate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiKey}`,
+          },
+        })
 
-          if (resp.status === 200) {
-            const data = await resp.json()
-            orgData.name = data.orgName
+        if (resp.status === 200) {
+          const data = await resp.json()
+          orgData.name = data.orgName
 
-            // Add this org to the config file
-            config.orgInfo[orgId] = {
-              name: data.orgName,
-            }
-          } else if (resp.status === 401) {
-            // Delete this org from the config file
-            delete config.auth[orgId]
-            delete config.orgInfo[orgId]
-            if (config.currentOrg === orgId) {
-              config.currentOrg = undefined
-            }
-
-            shouldAddOrg = false
-          } else {
-            this.error('There was an error validating organizations. Please try again.', {exit: 1})
+          // Add this org to the config file
+          config.orgInfo[orgId] = {
+            name: data.orgName,
           }
-        } else if (config.orgInfo[orgId]) {
-          orgData.name = config.orgInfo[orgId].name
+        } else if (resp.status === 401) {
+          // Delete this org from the config file
+          delete config.auth[orgId]
+          delete config.orgInfo[orgId]
+          if (config.currentOrg === orgId) {
+            config.currentOrg = undefined
+          }
+
+          shouldAddOrg = false
+        } else {
+          this.error('There was an error validating organizations. Please try again.', {exit: 1})
         }
 
         if (shouldAddOrg) {

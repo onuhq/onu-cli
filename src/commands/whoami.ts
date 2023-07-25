@@ -1,7 +1,7 @@
 import {Command} from '@oclif/core'
 import fse from 'fs-extra'
 import {BASE_URL, CONFIG_FILE_PATH, OnuConfig} from '../constants'
-
+import fetch from 'node-fetch'
 export default class Whoami extends Command {
   static description = 'show the org you are currently logged in as'
 
@@ -43,36 +43,32 @@ export default class Whoami extends Command {
     }
 
     let name
-    if (!config.orgInfo[orgId]) {
-      // get the org info from the server
-      const resp = await fetch(`${BASE_URL}/v1/cli/auth/validate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-      })
+    // get the org info from the server
+    const resp = await fetch(`${BASE_URL}/v1/cli/auth/validate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+    })
 
-      if (resp.status === 200) {
-        const data = await resp.json()
+    if (resp.status === 200) {
+      const data = await resp.json()
 
-        // Add this org to the config file
-        config.orgInfo[orgId] = {
-          name: data.orgName,
-        }
-        name = data.orgName
-      } else if (resp.status === 401) {
-        // Delete this org from the config file
-        delete config.auth[orgId]
-        delete config.orgInfo[orgId]
-        if (config.currentOrg === orgId) {
-          config.currentOrg = undefined
-        }
-      } else {
-        this.error('There was an error validating your login. Please try again.', {exit: 1})
+      // Add this org to the config file
+      config.orgInfo[orgId] = {
+        name: data.orgName,
       }
-    } else if (config.orgInfo[orgId]) {
-      name = config.orgInfo[orgId].name
+      name = data.orgName
+    } else if (resp.status === 401) {
+      // Delete this org from the config file
+      delete config.auth[orgId]
+      delete config.orgInfo[orgId]
+      if (config.currentOrg === orgId) {
+        config.currentOrg = undefined
+      }
+    } else {
+      this.error('There was an error validating your login. Please try again.', {exit: 1})
     }
 
     await fse.writeJSON(CONFIG_FILE_PATH, config, {spaces: 2})

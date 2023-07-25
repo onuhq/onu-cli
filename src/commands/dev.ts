@@ -217,7 +217,7 @@ const runDevStudio = async (command: Command, port: string | undefined, tsconfig
 
   shell.cd(CLIENT_PATH)
   const onuDevJson = getOnuDevJson()
-  childProcess.spawnSync('yarn preconfigure', {shell: true,
+  const preconfigureProcess = childProcess.spawnSync('yarn preconfigure', {shell: true,
     env: {
       ...process.env,
       PORT: port,
@@ -225,6 +225,14 @@ const runDevStudio = async (command: Command, port: string | undefined, tsconfig
       ...onuDevJson.env,
     },
   })
+  if (preconfigureProcess.status !== 0) {
+    ux.action.stop()
+    console.log(preconfigureProcess.stdout.toString())
+    console.log(preconfigureProcess.stderr.toString())
+    console.log('There was an error configuring your Onu Studio instance')
+    command.exit(1)
+  }
+
   ux.action.stop('done')
   command.log('Local Onu Studio instance is ready. Launching your site...')
   await runSite(command, (port as string) || '3000', tsconfig)
