@@ -5,7 +5,7 @@ import {demoTaskJs, demoTaskTs, tsConfig} from '../../src/helpers/starter-files'
 import inquirer from 'inquirer'
 import childProcess from 'node:child_process'
 import path from 'node:path'
-import {BASE_URL} from '../../src/constants'
+import {BASE_URL, TARGET_ONU_NODE_VERSION} from '../../src/constants'
 
 const expectOutput = (ctx: any, language: 'ts' | 'js') => {
   expect(BASE_URL).to.equal('https://api.joinonu.com')
@@ -22,9 +22,12 @@ const expectOutput = (ctx: any, language: 'ts' | 'js') => {
   // ensure that the fs.writeFile stub function was called
   const fsMockWriteFile = fse.writeFileSync as unknown as sinon.SinonStub
   expect(fsMockWriteFile.called).to.be.true
-  expect(fsMockWriteFile.callCount).to.equal(1)
+  expect(fsMockWriteFile.callCount).to.equal(2)
   expect(fsMockWriteFile.getCall(0).args[0]).to.equal(path.join('onu', `demoTask.${extension}`))
   expect(fsMockWriteFile.getCall(0).args[1]).to.equal(demoTask)
+
+  expect(fsMockWriteFile.getCall(1).args[0]).to.equal(path.join('package.json'))
+  expect(fsMockWriteFile.getCall(1).args[1]).to.equal(JSON.stringify({version: '1', dependencies: {'@onuhq/node': TARGET_ONU_NODE_VERSION}}, null, 2))
 }
 
 describe('init', () => {
@@ -33,6 +36,7 @@ describe('init', () => {
   .stub(fse, 'writeFileSync', sinon.stub().returns(true))
   .stub(fse, 'existsSync', sinon.stub().returns(false))
   .stub(fse, 'mkdirSync', sinon.stub().returns(true))
+  .stub(fse, 'readJSONSync', sinon.stub().returns({version: '1'}))
   .stub(inquirer, 'prompt', sinon.stub().returns({projectName: 'test', installer: 'npm', createNewProject: 'add'}))
   .command(['init', '--language=ts'])
   .it('runs init cmd with ts flag', ctx => {
@@ -44,6 +48,7 @@ describe('init', () => {
   .stub(fse, 'writeFileSync', sinon.stub().returns(true))
   .stub(fse, 'existsSync', sinon.stub().returns(false))
   .stub(fse, 'mkdirSync', sinon.stub().returns(true))
+  .stub(fse, 'readJSONSync', sinon.stub().returns({version: '1'}))
   .stub(inquirer, 'prompt', sinon.stub().returns({projectName: 'test', installer: 'npm', createNewProject: 'add'}))
   .command(['init', '--language=typescript'])
   .it('runs init cmd with typescript flag', ctx => {
@@ -55,6 +60,7 @@ describe('init', () => {
   .stub(fse, 'writeFileSync', sinon.stub().returns(true))
   .stub(fse, 'existsSync', sinon.stub().returns(false))
   .stub(fse, 'mkdirSync', sinon.stub().returns(true))
+  .stub(fse, 'readJSONSync', sinon.stub().returns({version: '1'}))
   .stub(inquirer, 'prompt', sinon.stub().returns({projectName: 'test', installer: 'npm', createNewProject: 'add'}))
   .command(['init', '--language=js'])
   .it('runs init cmd with js flag', ctx => {
@@ -66,6 +72,7 @@ describe('init', () => {
   .stub(fse, 'writeFileSync', sinon.stub().returns(true))
   .stub(fse, 'existsSync', sinon.stub().returns(false))
   .stub(fse, 'mkdirSync', sinon.stub().returns(true))
+  .stub(fse, 'readJSONSync', sinon.stub().returns({version: '1'}))
   .stub(inquirer, 'prompt', sinon.stub().returns({projectName: 'test', installer: 'npm', createNewProject: 'add'}))
   .command(['init', '--language=javascript'])
   .it('runs init cmd with javascript flag', ctx => {

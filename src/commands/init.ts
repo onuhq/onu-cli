@@ -143,6 +143,12 @@ export default class Init extends Command {
       } else {
         // add onu to existing package.json
         const packageJson = fse.readJSONSync(path.join(projectName, 'package.json'))
+        let dependencies = packageJson.dependencies
+        if (!dependencies) {
+          dependencies = {}
+          packageJson.dependencies = dependencies
+        }
+
         const hasOnu = packageJson.dependencies['@onuhq/node']
         if (!hasOnu) {
           packageJson.dependencies['@onuhq/node'] = TARGET_ONU_NODE_VERSION
@@ -200,6 +206,12 @@ export default class Init extends Command {
       } else {
         // add onu to existing package.json
         const packageJson = fse.readJSONSync(path.join(projectName, 'package.json'))
+        let dependencies = packageJson.dependencies
+        if (!dependencies) {
+          dependencies = {}
+          packageJson.dependencies = dependencies
+        }
+
         const hasOnu = packageJson.dependencies['@onuhq/node']
         if (!hasOnu) {
           packageJson.dependencies['@onuhq/node'] = TARGET_ONU_NODE_VERSION
