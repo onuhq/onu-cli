@@ -140,6 +140,22 @@ export default class Init extends Command {
         this.log('Installing dependencies...')
         installProjectDeps(installer, projectName, this)
         this.log(chalk.green(`\nDone! To start your project, run:\n\ncd ${projectName}\n${installer === 'npm' ? 'npm run dev' : 'yarn dev'}\n\n`))
+      } else {
+        // add onu to existing package.json
+        const packageJson = fse.readJSONSync(path.join(projectName, 'package.json'))
+        let dependencies = packageJson.dependencies
+        if (!dependencies) {
+          dependencies = {}
+          packageJson.dependencies = dependencies
+        }
+
+        const hasOnu = packageJson.dependencies['@onuhq/node']
+        if (!hasOnu) {
+          packageJson.dependencies['@onuhq/node'] = TARGET_ONU_NODE_VERSION
+          fse.writeFileSync(path.join(projectName, 'package.json'), JSON.stringify(packageJson, null, 2))
+          this.log('Installing dependencies...')
+          installProjectDeps(installer, projectName, this)
+        }
       }
 
       break
@@ -187,6 +203,22 @@ export default class Init extends Command {
         this.log('Installing dependencies...')
         installProjectDeps(installer, projectName, this)
         this.log(chalk.green(`\nDone! To start your project, run:\n\ncd ${projectName}\n${installer === 'npm' ? 'npm run dev' : 'yarn dev'}\n\n`))
+      } else {
+        // add onu to existing package.json
+        const packageJson = fse.readJSONSync(path.join(projectName, 'package.json'))
+        let dependencies = packageJson.dependencies
+        if (!dependencies) {
+          dependencies = {}
+          packageJson.dependencies = dependencies
+        }
+
+        const hasOnu = packageJson.dependencies['@onuhq/node']
+        if (!hasOnu) {
+          packageJson.dependencies['@onuhq/node'] = TARGET_ONU_NODE_VERSION
+          fse.writeFileSync(path.join(projectName, 'package.json'), JSON.stringify(packageJson, null, 2))
+          this.log('Installing dependencies...')
+          installProjectDeps(installer, projectName, this)
+        }
       }
 
       break
