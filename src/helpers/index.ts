@@ -34,6 +34,10 @@ export const execPackageExists = async (): Promise<boolean> => {
   return fse.pathExists(path.join(CMD_EXEC_PATH, 'package.json'))
 }
 
+export const onuJsonExists = async (): Promise<boolean> => {
+  return fse.pathExists(path.join(CMD_EXEC_PATH, 'onu.json'))
+}
+
 export const ensureYarn = (command: Command): void => {
   const yarnInstalled = shell.which('yarn')
   if (!yarnInstalled) {
