@@ -36,7 +36,8 @@ export default class Template extends Command {
     const validLanguages = ['typescript', 'javascript', 'js', 'ts']
 
     if (!validLanguages.includes(flags.language)) {
-      this.error('Invalid language. Must be one of: typescript, javascript', {exit: 1})
+      this.log(chalk.red('Invalid language. Must be one of: typescript, javascript'))
+      return
     }
 
     // template name can either be 'ts' or 'js'
@@ -50,7 +51,8 @@ export default class Template extends Command {
     const hasPackageJson = await execPackageExists()
 
     if (!hasNodeModules || !hasPackageJson) {
-      this.error('You must run this command in the project\'s root directory.', {exit: 1})
+      this.log(chalk.red('You must run this command in the project\'s root directory.'))
+      return
     }
 
     const hasOnuJson = await onuJsonExists()
