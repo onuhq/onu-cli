@@ -7,4 +7,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: echo 'hi'
+      - run: curl -d "content=messagecontenttest" ${{secrets.DISCORD_WEBHOOK_URL}}
