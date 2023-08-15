@@ -1,0 +1,10 @@
+name: post to discord
+
+on: push
+
+jobs:
+  publish-gpr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: echo 'hi'
