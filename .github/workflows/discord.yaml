@@ -7,4 +7,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: curl -d "content=messagecontenttest" ${{secrets.DISCORD_WEBHOOK_URL}}
+      - run: curl -X POST -H "Content-Type: application/json" -d '{"embeds":[{"type":"rich", "title":"test from gh actions"}]}' ${{secrets.DISCORD_WEBHOOK_URL}}
